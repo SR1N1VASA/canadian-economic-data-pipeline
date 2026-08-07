@@ -8,9 +8,10 @@ Bank of Canada, validates and transforms the data, and publishes structured
 datasets for analysis.
 
 ## Current Progress
-- Repository and project structure created
-- Initial Python ingestion process started
-- Bank of Canada data source identified
+- Created the initial Python ingestion component
+- Retrieved public USD/CAD observations from the Bank of Canada Valet API
+- Added request error handling and configurable date parameters
+- Preserved the raw response with source and ingestion metadata
 
 ## Planned Work
 - Databricks and PySpark transformations
