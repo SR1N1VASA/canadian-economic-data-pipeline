@@ -4,25 +4,66 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+# ---------------------------------------------------------
+# 1. Notebook parameters
+# ---------------------------------------------------------
 
-SERIES = "FXUSDCAD"
-DEFAULT_START_DATE = "2024-01-01"
+dbutils.widgets.text(
+    "series",
+    "FXUSDCAD",
+    "Bank of Canada Series"
+)
+
+dbutils.widgets.text(
+    "default_start_date",
+    "2024-01-01",
+    "Default Start Date"
+)
+
+dbutils.widgets.text(
+    "schema_name",
+    "default",
+    "Schema"
+)
+
+dbutils.widgets.text(
+    "volume_name",
+    "boc_raw",
+    "Raw Volume"
+)
+
+
+SERIES = dbutils.widgets.get("series")
+DEFAULT_START_DATE = dbutils.widgets.get("default_start_date")
+schema_name = dbutils.widgets.get("schema_name")
+volume_name = dbutils.widgets.get("volume_name")
+
+
+# ---------------------------------------------------------
+# 2. Fixed configuration
+# ---------------------------------------------------------
+
 BASE_URL = "https://www.bankofcanada.ca/valet"
 
 catalog_name = spark.catalog.currentCatalog()
 
 silver_table = (
-    f"`{catalog_name}`."
-    f"`default`."
-    f"`boc_silver_exchange_rates`"
+    f"{catalog_name}."
+    f"{schema_name}."
+    f"boc_silver_exchange_rates"
 )
 
 volume_path = (
-    f"/Volumes/{catalog_name}/default/boc_raw"
+    f"/Volumes/{catalog_name}/"
+    f"{schema_name}/"
+    f"{volume_name}"
 )
 
 
-# Determine incremental start date
+# ---------------------------------------------------------
+# 3. Determine incremental start date
+# ---------------------------------------------------------
+
 if spark.catalog.tableExists(silver_table):
 
     latest_date = (
@@ -44,31 +85,47 @@ else:
     START_DATE = DEFAULT_START_DATE
 
 
-print("Fetching observations from:", START_DATE)
+print("Series:", SERIES)
+print("API start date:", START_DATE)
+print("Raw volume:", volume_path)
 
 
-# Call Bank of Canada API
+# ---------------------------------------------------------
+# 4. Call Bank of Canada API
+# ---------------------------------------------------------
+
 api_url = (
     f"{BASE_URL}/observations/{SERIES}/json"
     f"?start_date={START_DATE}"
 )
 
-response = requests.get(api_url, timeout=30)
+response = requests.get(
+    api_url,
+    timeout=30
+)
+
 response.raise_for_status()
 
 payload = response.json()
 
-observations = payload.get("observations", [])
+observations = payload.get(
+    "observations",
+    []
+)
 
+# ---------------------------------------------------------
+# 5. Save only when new observations exist
+# ---------------------------------------------------------
 
-# Only save a raw file if new data exists
 if not observations:
 
     print("No new observations available.")
 
 else:
 
-    retrieved_at = datetime.now(timezone.utc)
+    retrieved_at = datetime.now(
+        timezone.utc
+    )
 
     raw_data = {
         "metadata": {
@@ -105,6 +162,9 @@ else:
         )
 
     print(
-        f"Saved {len(observations)} observations "
-        f"to {file_path}"
+        f"Received {len(observations)} new observations."
+    )
+
+    print(
+        f"Raw data saved to: {file_path}"
     )
