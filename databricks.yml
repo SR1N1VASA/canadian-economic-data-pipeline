@@ -1,0 +1,10 @@
+bundle:
+  name: canadian-economic-data-pipeline
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
