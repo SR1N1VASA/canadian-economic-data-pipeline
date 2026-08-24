@@ -1,0 +1,73 @@
+resources:
+  jobs:
+    canadian_economic_pipeline:
+
+      name: Canadian Economic Data Pipeline
+
+      parameters:
+        - name: series
+          default: FXUSDCAD
+
+        - name: default_start_date
+          default: "2024-01-01"
+
+        - name: schema_name
+          default: default
+
+        - name: volume_name
+          default: boc_raw
+
+        - name: bronze_table_name
+          default: boc_bronze_raw
+
+        - name: silver_table_name
+          default: boc_silver_exchange_rates
+
+        - name: gold_table_name
+          default: boc_gold_monthly_exchange_rates
+
+      tasks:
+
+        - task_key: api_ingestion
+
+          notebook_task:
+            notebook_path: ../notebooks/00_api_ingestion.py
+
+          max_retries: 2
+          min_retry_interval_millis: 120000
+
+
+        - task_key: bronze_ingestion
+
+          depends_on:
+            - task_key: api_ingestion
+
+          notebook_task:
+            notebook_path: ../notebooks/01_bronze_ingestion.py
+
+
+        - task_key: silver_transformation
+
+          depends_on:
+            - task_key: bronze_ingestion
+
+          notebook_task:
+            notebook_path: ../notebooks/02_silver_transformation.py
+
+
+        - task_key: data_quality
+
+          depends_on:
+            - task_key: silver_transformation
+
+          notebook_task:
+            notebook_path: ../notebooks/03_data_quality.py
+
+
+        - task_key: gold_analytics
+
+          depends_on:
+            - task_key: data_quality
+
+          notebook_task:
+            notebook_path: ../notebooks/04_gold_analytics.sql
