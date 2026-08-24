@@ -1,5 +1,7 @@
 -- Databricks notebook source
-CREATE OR REPLACE TABLE boc_gold_monthly_exchange_rates
+USE SCHEMA IDENTIFIER(:schema_name);
+
+CREATE OR REPLACE TABLE IDENTIFIER(:gold_table_name)
 USING DELTA
 AS
 
@@ -11,7 +13,9 @@ SELECT
     AVG(value) AS average_rate,
     MIN(value) AS minimum_rate,
     MAX(value) AS maximum_rate
-FROM boc_silver_exchange_rates
+
+FROM IDENTIFIER(:silver_table_name)
+
 GROUP BY
     YEAR(observation_date),
     MONTH(observation_date),
@@ -20,5 +24,5 @@ GROUP BY
 -- COMMAND ----------
 
 SELECT *
-FROM boc_gold_monthly_exchange_rates
+FROM IDENTIFIER(:gold_table_name)
 ORDER BY year, month;
