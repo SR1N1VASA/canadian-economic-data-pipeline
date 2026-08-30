@@ -4,7 +4,45 @@ bundle:
 include:
   - resources/*.yml
 
+variables:
+  series:
+    description: Bank of Canada series
+    default: FXUSDCAD
+
+  default_start_date:
+    description: Initial API start date
+    default: "2024-01-01"
+
+  schema_name:
+    description: Unity Catalog schema
+    default: default
+
+  volume_name:
+    description: Raw data volume
+    default: boc_raw
+
+  bronze_table_name:
+    description: Bronze Delta table
+    default: boc_bronze_raw
+
+  silver_table_name:
+    description: Silver Delta table
+    default: boc_silver_exchange_rates
+
+  gold_table_name:
+    description: Gold Delta table
+    default: boc_gold_monthly_exchange_rates
+
 targets:
   dev:
     mode: development
     default: true
+
+    variables:
+      series: FXUSDCAD
+      default_start_date: "2024-01-01"
+      schema_name: default
+      volume_name: boc_raw
+      bronze_table_name: boc_bronze_raw
+      silver_table_name: boc_silver_exchange_rates
+      gold_table_name: boc_gold_monthly_exchange_rates
