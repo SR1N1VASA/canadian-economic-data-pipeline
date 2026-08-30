@@ -25,6 +25,9 @@ resources:
 
         - name: gold_table_name
           default: ${var.gold_table_name}
+        
+        - name: audit_table_name
+          default: ${var.audit_table_name}
 
       tasks:
 
@@ -71,3 +74,11 @@ resources:
 
           notebook_task:
             notebook_path: ../notebooks/04_gold_analytics.sql
+        
+        - task_key: pipeline_audit
+
+          depends_on:
+            - task_key: gold_analytics
+
+          notebook_task:
+            notebook_path: ../notebooks/06_pipeline_audit.py

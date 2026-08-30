@@ -32,6 +32,10 @@ variables:
   gold_table_name:
     description: Gold Delta table
     default: boc_gold_monthly_exchange_rates
+  
+  audit_table_name:
+    description: Pipeline audit Delta table
+    default: boc_pipeline_audit
 
 targets:
   dev:
@@ -46,3 +50,4 @@ targets:
       bronze_table_name: boc_bronze_raw
       silver_table_name: boc_silver_exchange_rates
       gold_table_name: boc_gold_monthly_exchange_rates
+      audit_table_name: boc_pipeline_audit
